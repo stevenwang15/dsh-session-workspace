@@ -1,0 +1,16 @@
+# dsh-session-workspace bundle layer.
+#
+# Inserts this package's plugin row into the profile composition. The plugin
+# (index.js) exports name = "session-workspace" and injects the Session
+# controller and Workspace registry; it wraps session.create so a new
+# conversation is created in a fresh directory registered as its own Workspace.
+#
+# Optional config (add it to your profile's cordis.patch.yml by overriding this
+# row, or add a later patch row with the same id):
+#   config:
+#     enabled: true
+#     mode: managed            # managed | all
+#     baseDir: /absolute/path  # default: sibling of the default workspace
+- insert:
+    - id: session-workspace
+      name: dsh-session-workspace

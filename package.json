@@ -1,0 +1,67 @@
+{
+  "name": "dsh-session-workspace",
+  "version": "0.2.0",
+  "description": "DeepSeek Harness 插件：每个新对话自动创建并进入独立工作区（独立目录 + 独立沙箱根），实现跨对话文件隔离；输入框旁提供运行时开关。One conversation, one workspace, one sandbox.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "scripts/install-local.sh",
+    "scripts/uninstall-local.sh",
+    "scripts/e2e-remote.mjs",
+    "scripts/run-e2e.sh",
+    "scripts/e2e-control.mjs",
+    "docs/E2E.md"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "workspace",
+    "isolation",
+    "sandbox",
+    "session",
+    "conversation",
+    "client-plugin"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "node test/smoke.mjs && node test/client.mjs && node test/contract.mjs",
+    "test:smoke": "node test/smoke.mjs",
+    "test:client": "node test/client.mjs",
+    "test:contract": "node test/contract.mjs",
+    "e2e": "sh scripts/run-e2e.sh",
+    "e2e:control": "node scripts/e2e-control.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "homepage": "https://github.com/stevenwang15/dsh-session-workspace#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevenwang15/dsh-session-workspace.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stevenwang15/dsh-session-workspace/issues"
+  }
+}

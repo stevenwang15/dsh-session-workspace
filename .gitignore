@@ -1,0 +1,17 @@
+# installed artifacts
+node_modules/
+.pnpm-store/
+
+# local build/release artifacts
+.npm-cache/
+*.tgz
+*.zip
+
+# test scratch (isolated DSH homes created by the E2E suites)
+.e2e/
+.e2e-*/
+.e2e-report.json
+
+# logs / OS files
+*.log
+.DS_Store
