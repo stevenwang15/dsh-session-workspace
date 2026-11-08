@@ -5,6 +5,16 @@
 
 English | [中文](README.md)
 
+![dsh-session-workspace 预览](docs/preview.png)
+
+### 一行安装
+
+```bash
+dsh plugin --profile desktop add github:stevenwang15/dsh-session-workspace
+```
+
+需要 Node 22+。完整装法、参数与卸载见下文。
+
 ---
 
 ## The problem (in plain words)
@@ -163,3 +173,15 @@ E2E boots an isolated `DSH_HOME` under `.e2e*`; it never touches your `~/.dsh` a
 ## License
 
 [MIT](LICENSE)
+
+## The DSH plugin family
+
+| Plugin | In one line |
+| :--- | :--- |
+| [dsh-caveman](https://github.com/stevenwang15/dsh-caveman) | 让 agent 少说废话、多留事实 |
+| [dsh-taste-skill](https://github.com/stevenwang15/dsh-taste-skill) | 前端设计：先定方向，再量，再看 |
+| [dsh-session-workspace](https://github.com/stevenwang15/dsh-session-workspace) | 一个对话，一个独立工作区 |
+
+---
+
+Found a bug or want a feature? [Open an issue](https://github.com/stevenwang15/dsh-session-workspace/issues/new/choose). If this plugin helps you, a ⭐ helps others find it.

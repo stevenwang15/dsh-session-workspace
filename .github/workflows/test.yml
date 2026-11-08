@@ -18,4 +18,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       # The package has no dependencies and no build step: the tests only need Node.
+      # Cheap static gates first: a syntax error or malformed JSON should fail
+      # fast, before the slower behavioural suites run.
+      - name: Static checks
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('screenshots.json', 'utf8'))"
+          for f in $(git ls-files '*.js' '*.mjs'); do node --check "$f"; done
       - run: npm test
