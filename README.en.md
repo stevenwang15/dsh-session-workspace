@@ -61,7 +61,7 @@ Once a chat is open, there's a pill at the **far left of the composer toolbar**:
 dsh plugin --profile desktop add github:stevenwang15/dsh-session-workspace
 ```
 
-> If that fails, download `dsh-session-workspace-0.2.0.tgz` from Releases and run
+> If that fails, download `dsh-session-workspace-0.2.1.tgz` from Releases and run
 > `dsh plugin --profile desktop add file:/absolute/path/to/the.tgz`.
 
 **Step 2 — enable it**
@@ -163,7 +163,7 @@ In DSH a “workspace” is a directory: the `cwd` recorded at session creation 
 Zero dependencies, no build step:
 
 ```sh
-npm test                 # 28 tests (host unit 21 + browser half 2 + contract 5)
+npm test                 # 31 tests (host unit 24 + browser half 2 + contract 5)
 npm run e2e              # real DSH Host: isolation / blank reuse / explicit cwd
 npm run e2e:control      # real DSH Host: control API + browser bundle publication
 ```

@@ -270,6 +270,17 @@ export function shouldIsolate(ctx, settings, state, request) {
  */
 export async function createManagedWorkspace(ctx, state) {
   await mkdir(state.baseDir, { recursive: true })
+  // `resolveBaseDir` can only canonicalize the nearest existing ancestor, so a
+  // base directory created below a symlink (`~/Documents` redirected to iCloud,
+  // `/var` on macOS) keeps its unresolved spelling. The registry stores
+  // `fs.realpath` results, so refresh the copy the containment check compares
+  // against; otherwise the next new conversation would not be recognised as
+  // belonging to a managed workspace and would reuse this one.
+  try {
+    state.baseDir = await realpath(state.baseDir)
+  } catch {
+    // Keep the configured spelling; allocation below still works.
+  }
   const now = new Date()
   let directory
   let lastError
@@ -287,7 +298,19 @@ export async function createManagedWorkspace(ctx, state) {
   }
   if (directory === undefined) throw lastError ?? new Error('session-workspace: could not allocate a workspace directory')
   const { title } = directoryPlan(now, 0)
-  const workspace = await ctx.workspaceRegistry.create(directory, title)
+  let workspace
+  try {
+    workspace = await ctx.workspaceRegistry.create(directory, title)
+  } catch (error) {
+    // The directory belongs to this attempt only, so a failed registration must
+    // not leave an empty numbered folder behind for every retry of New Session.
+    try {
+      if ((await readdir(directory)).length === 0) await rmdir(directory)
+    } catch {
+      // Best effort: the allocation failure is the error worth reporting.
+    }
+    throw error
+  }
   return { workspace, directory }
 }
 
@@ -493,8 +516,11 @@ function registerControlApi(ctx, settings, state) {
       ctx.logger?.warn?.('[session-workspace] the composed Connection exposes no Fetch route registry; the composer control stays hidden')
       return
     }
+    // Bind each registration to the plugin lifetime: a reload (config change)
+    // disposes and re-applies this row, and a route left behind would make the
+    // second registration of the same path fail.
     for (const route of controlRoutes(settings, state, (message) => ctx.logger?.info?.(message))) {
-      connection.fetch.register(route)
+      scoped.effect(() => connection.fetch.register(route), `session-workspace: ${route.path} route`)
     }
     ctx.logger?.info?.(`[session-workspace] control API mounted at ${CONTROL_PATH}`)
   })

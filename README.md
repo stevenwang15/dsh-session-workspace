@@ -63,7 +63,7 @@ open ~/Documents/deepseek-harness/session-workspaces
 dsh plugin --profile desktop add github:stevenwang15/dsh-session-workspace
 ```
 
-> 如果这条命令报错，也可以用 Release 里的压缩包：下载 `dsh-session-workspace-0.2.0.tgz`，然后执行
+> 如果这条命令报错，也可以用 Release 里的压缩包：下载 `dsh-session-workspace-0.2.1.tgz`，然后执行
 > `dsh plugin --profile desktop add file:下载文件的绝对路径`。
 
 **第 2 步：告诉 DSH 启用它**
@@ -171,7 +171,7 @@ DSH 里「工作区」就是一个目录：会话创建时记录的 `cwd` 同时
 零依赖、无需构建，克隆即可跑：
 
 ```sh
-npm test                 # 28 项测试（Host 单元 21 + 浏览器半身 2 + 分发契约 5）
+npm test                 # 31 项测试（Host 单元 24 + 浏览器半身 2 + 分发契约 5）
 npm run e2e              # 真 DSH Host 端到端：隔离 / 空白复用 / 显式目录
 npm run e2e:control      # 真 DSH Host 端到端：开关接口 + 浏览器 bundle 发布
 ```

@@ -124,7 +124,7 @@ test('client bundle registers one composer control and both dictionaries', async
   const [{ namespace, dict }] = dictionaries
   assert.equal(namespace, 'sessionWorkspace')
   for (const language of ['zh', 'en']) {
-    for (const key of ['label', 'on', 'off', 'hintOn', 'hintOff']) {
+    for (const key of ['label', 'on', 'off', 'hintOn', 'hintOff', 'error']) {
       assert.equal(typeof dict[language][key], 'string', `${language}.${key} is a string`)
     }
   }

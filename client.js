@@ -116,21 +116,34 @@ window.__ModuleLoader__.load({
     function SessionWorkspacePill({ t }) {
       const [state, setState] = useState(undefined)
       const [unavailable, setUnavailable] = useState(false)
+      const [failed, setFailed] = useState(false)
       const [busy, setBusy] = useState(false)
 
       const load = useCallback(() => {
         let alive = true
-        readState()
-          .then((next) => {
-            if (!alive) return
-            setState(next)
-            setUnavailable(false)
-          })
-          .catch(() => {
-            if (alive) setUnavailable(true)
-          })
+        let timer
+        let attempt = 0
+        // The control API can come up a moment after the page (or the Host can
+        // be restarting), so retry briefly instead of hiding the pill until a
+        // manual reload.
+        const read = () => {
+          readState()
+            .then((next) => {
+              if (!alive) return
+              setState(next)
+              setUnavailable(false)
+            })
+            .catch(() => {
+              if (!alive) return
+              attempt += 1
+              if (attempt < 3) timer = setTimeout(read, 800 * attempt)
+              else setUnavailable(true)
+            })
+        }
+        read()
         return () => {
           alive = false
+          clearTimeout(timer)
         }
       }, [])
       useEffect(load, [load])
@@ -138,9 +151,10 @@ window.__ModuleLoader__.load({
       const toggle = useCallback(() => {
         if (busy || state === undefined) return
         setBusy(true)
+        setFailed(false)
         writeState(!state.enabled)
           .then((next) => setState(next))
-          .catch(() => setUnavailable(true))
+          .catch(() => setFailed(true))
           .finally(() => setBusy(false))
       }, [busy, state])
 
@@ -151,7 +165,7 @@ window.__ModuleLoader__.load({
         className: 'dsws-pill',
         'aria-pressed': enabled,
         'aria-label': t(enabled ? 'on' : 'off'),
-        title: t(enabled ? 'hintOn' : 'hintOff'),
+        title: t(failed ? 'error' : enabled ? 'hintOn' : 'hintOff'),
         disabled: busy,
         onClick: toggle,
       },

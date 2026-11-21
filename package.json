@@ -1,6 +1,6 @@
 {
   "name": "dsh-session-workspace",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "DeepSeek Harness 插件：每个新对话自动创建并进入独立工作区（独立目录 + 独立沙箱根），实现跨对话文件隔离；输入框旁提供运行时开关。One conversation, one workspace, one sandbox.",
   "type": "module",
   "main": "index.js",

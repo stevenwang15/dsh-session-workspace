@@ -12,7 +12,7 @@
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { mkdir, mkdtemp, readdir, realpath, rm, stat, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, realpath, rm, stat, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 
@@ -308,6 +308,40 @@ test('apply: an unusable base directory falls back to stock creation', async (t)
   assert.ok(fake.logs.some((entry) => entry.level === 'warn' && /falling back/.test(entry.message)))
 })
 
+test('apply: a failed workspace registration removes the fresh empty directory', async (t) => {
+  const root = await makeRoot(t)
+  const baseDir = join(root, 'session-workspaces')
+  const fake = await plugin(t, { baseDir })
+  fake.registry.create = async () => {
+    throw new Error('registry write failed')
+  }
+  const result = await fake.ctx.sessionController.create({})
+  assert.equal(result.sessionId, 'session-1')
+  assert.deepEqual(fake.calls[0], {}, 'the original request is forwarded unchanged')
+  assert.deepEqual(await readdir(baseDir), [], 'the claimed but unregistered directory is removed')
+  assert.ok(fake.logs.some((entry) => entry.level === 'warn' && /falling back/.test(entry.message)))
+})
+
+test('apply: a baseDir created below a symlink still isolates the next conversation', async (t) => {
+  if (process.platform === 'win32') return t.skip('directory symlinks need extra privileges on Windows')
+  const root = await makeRoot(t)
+  const real = join(root, 'real')
+  await mkdir(real, { recursive: true })
+  await symlink(real, join(root, 'link'), 'dir')
+  // The leaf's parent does not exist yet, so apply-time canonicalization can only
+  // resolve the symlink after the first allocation.
+  const baseDir = join(root, 'link', 'deep', 'session-workspaces')
+  const fake = await plugin(t, { baseDir })
+  const first = await fake.ctx.sessionController.create({})
+  assert.ok(first.cwd.startsWith(join(await realpath(real), 'deep')), `cwd is resolved through the symlink: ${first.cwd}`)
+  const firstWorkspaceId = fake.calls[0].workspaceId
+  const second = await fake.ctx.sessionController.create({ workspaceId: firstWorkspaceId })
+  assert.equal(fake.calls.length, 2)
+  assert.notEqual(fake.calls[1].workspaceId, firstWorkspaceId, 'the managed workspace is recognised and isolated again')
+  assert.notEqual(second.cwd, first.cwd)
+  assert.equal(fake.registry.list().length, 2)
+})
+
 test('apply: disposal restores the original create, and reloading re-wraps once', async (t) => {
   const root = await makeRoot(t)
   const fake = await fakeContext().seed()
@@ -431,6 +465,17 @@ test('control API: mounts two authenticated Fetch routes under /api', async (t) 
     assert.equal(route.requestBody, 'buffered')
     assert.equal(typeof route.fetch, 'function')
   }
+})
+
+test('control API: routes are released when the plugin is disposed', async (t) => {
+  const root = await makeRoot(t)
+  const fake = await fakeContext().seed()
+  apply(fake.ctx, { baseDir: join(root, 'a') })
+  assert.equal(fake.routes.length, 2)
+  for (const dispose of [...fake.disposers].reverse()) dispose()
+  assert.equal(fake.routes.length, 0, 'a reload must not leave the old routes registered')
+  apply(fake.ctx, { baseDir: join(root, 'b') })
+  assert.equal(fake.routes.length, 2, 'the re-applied instance registers its routes again')
 })
 
 test('control API: reports the runtime state over its Fetch route', async (t) => {

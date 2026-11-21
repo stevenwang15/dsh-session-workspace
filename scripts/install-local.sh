@@ -46,4 +46,4 @@ EOF
 echo
 echo "Installed. Restart DeepSeek Harness (or reload the profile) to mount the plugin."
 echo "Verify: open a chat, click New Session, and watch a new workspace appear under"
-echo "        ${DSH_HOME:-$HOME/.dsh}/../Documents/deepseek-harness/session-workspaces/ (or your configured baseDir)."
+echo "        $HOME/Documents/deepseek-harness/session-workspaces/ (next to the default workspace, or your configured baseDir)."
